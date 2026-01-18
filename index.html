@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Geoportal de Infraestructura Educativa del Distrito 06D04 Colta-Guamote">
+    <meta name="theme-color" content="#1a365d">
+    <title>Geoportal Educativo | Distrito 06D04</title>
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Overlay de carga -->
+    <div id="loading-overlay">
+        <div class="loader">
+            <div class="loading-logo">🎓</div>
+            <div class="spinner"></div>
+            <div id="loading-text">Iniciando geoportal...</div>
+        </div>
+    </div>
+
+    <!-- Overlay para cerrar sidebar en móvil -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Contenedor de notificaciones -->
+    <div id="notificaciones"></div>
+    
+    <!-- Botón menú móvil -->
+    <button id="btn-menu-movil" onclick="toggleSidebar()">☰</button>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="header-brand">
+            <div class="logo">🎓</div>
+            <div>
+                <h1>Geoportal Educativo</h1>
+                <span class="subtitle">Distrito 06D04 Colta-Guamote</span>
+            </div>
+        </div>
+        <span id="coords">--.-----, --.-----</span>
+    </header>
+    
+    <!-- Contenedor principal -->
+    <div id="container">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>Panel de Control</h2>
+                <p>Gestión de infraestructura educativa</p>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Módulos de Reporte -->
+                <div class="section">
+                    <h3 class="section-title">Módulos de Reporte</h3>
+                    <button class="modulo-btn infraestructura" onclick="abrirFormulario('infraestructura')">
+                        <span class="icon">🏫</span>
+                        <span>Infraestructura Educativa</span>
+                    </button>
+                    <button class="modulo-btn operaciones" onclick="abrirFormulario('operaciones')">
+                        <span class="icon">📦</span>
+                        <span>Operaciones y Logística</span>
+                    </button>
+                    <button class="modulo-btn riesgos" onclick="abrirFormulario('riesgos')">
+                        <span class="icon">⚠️</span>
+                        <span>Gestión de Riesgos</span>
+                    </button>
+                </div>
+
+                <!-- Capas Base -->
+                <div class="section">
+                    <h3 class="section-title">Capas Base</h3>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-area" checked>
+                        <div class="legend-color" style="background: #4299e1;"></div>
+                        <label for="lyr-area">Área de estudio</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-parroquias" checked>
+                        <div class="legend-color" style="background: #805ad5;"></div>
+                        <label for="lyr-parroquias">Parroquias</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-urbano">
+                        <div class="legend-color" style="background: #ed8936;"></div>
+                        <label for="lyr-urbano">Zonas urbanas</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                </div>
+
+                <!-- Infraestructura Educativa -->
+                <div class="section">
+                    <h3 class="section-title">Infraestructura Educativa</h3>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-instituciones" checked>
+                        <div class="legend-color" style="background: #e53e3e; border-radius: 50%;"></div>
+                        <label for="lyr-instituciones">Instituciones</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-edificios">
+                        <div class="legend-color" style="background: #ecc94b;"></div>
+                        <label for="lyr-edificios">Edificios</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                </div>
+
+                <!-- Red Vial -->
+                <div class="section">
+                    <h3 class="section-title">Red Vial</h3>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-vias1">
+                        <div class="legend-line" style="background: #c53030; height: 4px;"></div>
+                        <label for="lyr-vias1">Vías 1er orden</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-vias2">
+                        <div class="legend-line" style="background: #e53e3e; height: 3px;"></div>
+                        <label for="lyr-vias2">Vías 2do orden</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-vias3">
+                        <div class="legend-line" style="background: #718096; height: 2px;"></div>
+                        <label for="lyr-vias3">Vías 3er orden</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-vias4">
+                        <div class="legend-line" style="background: #a0aec0; height: 1px;"></div>
+                        <label for="lyr-vias4">Vías 4to orden</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                </div>
+
+                <!-- Capas de Reportes -->
+                <div class="section">
+                    <h3 class="section-title">Capas de Reportes</h3>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-rep-infra" checked>
+                        <div class="legend-color" style="background: #e53e3e; border-radius: 50%;"></div>
+                        <label for="lyr-rep-infra">Rep. Infraestructura</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-rep-oper" checked>
+                        <div class="legend-color" style="background: #4299e1; border-radius: 50%;"></div>
+                        <label for="lyr-rep-oper">Rep. Operaciones</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                    <div class="layer-item">
+                        <input type="checkbox" id="lyr-rep-riesgos" checked>
+                        <div class="legend-color" style="background: #ed8936; border-radius: 50%;"></div>
+                        <label for="lyr-rep-riesgos">Rep. Riesgos</label>
+                        <span class="error-icon">⚠️</span>
+                    </div>
+                </div>
+                
+                <!-- Estadísticas -->
+                <div class="section">
+                    <h3 class="section-title">Estadísticas</h3>
+                    <div class="stats-container" id="stats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="value">--</span>
+                                <span class="label">Instituciones</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="value">--</span>
+                                <span class="label">Estudiantes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="value">--</span>
+                                <span class="label">Docentes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="section">
+                    <h3 class="section-title">Clasificación por Estudiantes</h3>
+                    <div class="leyenda-container">
+                        <div class="leyenda-item">
+                            <div class="dot" style="background: #e53e3e; width: 10px; height: 10px;"></div>
+                            <span>Alerta (0 - 20 est.)</span>
+                        </div>
+                        <div class="leyenda-item">
+                            <div class="dot" style="background: #ed8936; width: 12px; height: 12px;"></div>
+                            <span>Pequeña (21 - 100 est.)</span>
+                        </div>
+                        <div class="leyenda-item">
+                            <div class="dot" style="background: #4299e1; width: 14px; height: 14px;"></div>
+                            <span>Mediana (101 - 400 est.)</span>
+                        </div>
+                        <div class="leyenda-item">
+                            <div class="dot" style="background: #48bb78; width: 16px; height: 16px;"></div>
+                            <span>Grande (+401 est.)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Mapa -->
+        <main id="map"></main>
+    </div>
+
+    <!-- Panel de información -->
+    <div id="info-panel">
+        <div class="info-header">
+            <h4 id="info-title">Información</h4>
+            <span class="close-btn" onclick="closeInfo()">×</span>
+        </div>
+        <div class="info-content" id="info-content"></div>
+    </div>
+
+    <!-- Modal de Formularios -->
+    <div id="modal-overlay">
+        <div id="form-modal">
+            <div class="modal-header" id="modal-header">
+                <h3 id="modal-titulo">Nuevo Reporte</h3>
+                <span class="drag-hint">⋮⋮ Arrastrar</span>
+                <span class="close-btn" onclick="cerrarFormulario()">×</span>
+            </div>
+            <div class="modal-body">
+                <form id="form-reporte" onsubmit="enviarReporte(event)">
+                    <!-- Selector de institución -->
+                    <div class="form-group institucion-search">
+                        <label>Institución Educativa</label>
+                        <input type="text" id="inp-institucion" placeholder="Buscar institución..." autocomplete="off">
+                        <input type="hidden" id="inp-codigo-amie">
+                        <div class="institucion-list" id="lista-instituciones"></div>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="ubicacion-section">
+                        <h4>📍 Ubicación del Reporte</h4>
+                        <div class="ubicacion-btns">
+                            <button type="button" class="ubicacion-btn" id="btn-gps" onclick="obtenerGPS()">
+                                📱 Mi ubicación GPS
+                            </button>
+                            <button type="button" class="ubicacion-btn" id="btn-mapa" onclick="activarCapturaMapa()">
+                                🗺️ Seleccionar en mapa
+                            </button>
+                        </div>
+                        <div class="instruccion-mapa" id="instruccion-mapa">
+                            👆 Haz clic en el mapa para seleccionar la ubicación
+                        </div>
+                        <div class="coords-display">
+                            <div class="form-group">
+                                <label>Latitud</label>
+                                <input type="number" id="inp-lat" step="any" required readonly placeholder="-1.85...">
+                            </div>
+                            <div class="form-group">
+                                <label>Longitud</label>
+                                <input type="number" id="inp-lon" step="any" required readonly placeholder="-78.65...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campos dinámicos según módulo -->
+                    <div id="campos-dinamicos"></div>
+
+                    <!-- Nombre de quien reporta -->
+                    <div class="form-group">
+                        <label>Nombre de quien reporta *</label>
+                        <input type="text" id="inp-nombre" required placeholder="Tu nombre completo">
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btn-submit">Enviar Reporte</button>
+                    <div class="form-message" id="form-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
